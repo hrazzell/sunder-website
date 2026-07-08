@@ -25,14 +25,13 @@ python3 -m http.server 8000
 
 ## Hosting (GitHub Pages)
 
-This repo started empty, so its default branch is currently
-`claude/sunder-website-design-87brgq`. Recommended one-time setup:
+One-time setup:
 
-1. **Settings → Branches** (or **Settings → General → Default branch**):
-   rename the default branch to `main`. GitHub redirects the old name
-   automatically.
-2. **Settings → Pages** → Source: **Deploy from a branch**; branch `main`
-   (or the current default branch if you skip step 1), folder `/ (root)`.
+1. **Settings → General → Default branch**: switch the default branch to
+   `main` (the repo started empty, so the first pushed feature branch became
+   the default).
+2. **Settings → Pages** → Source: **Deploy from a branch**; branch `main`,
+   folder `/ (root)`.
 3. The site publishes at `https://hrazzell.github.io/sunder-website/`.
 
 The absolute URLs in `index.html` (`canonical`, `og:url`, `og:image`,
