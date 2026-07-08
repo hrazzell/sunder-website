@@ -52,6 +52,14 @@ h3 { font-size: 1.06rem; margin-bottom: 0.45em; }
 a { color: var(--accent-strong); text-decoration: none; }
 a:hover { text-decoration: underline; }
 
+a:focus-visible,
+button:focus-visible,
+summary:focus-visible {
+  outline: 2px solid var(--accent-strong);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
 code {
   font-family: var(--mono);
   font-size: 0.9em;
@@ -432,7 +440,8 @@ code {
 @media (max-width: 640px) {
   .section { padding: 64px 0; }
   .hero { padding: 56px 0; }
-  .nav-links { display: none; }
+  .nav-links a { display: none; }
+  .nav-links a.nav-keep { display: inline; font-size: 0.85rem; }
   .grid-3, .grid-4, .loop { grid-template-columns: 1fr; }
   body { font-size: 16px; }
 }

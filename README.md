@@ -25,11 +25,19 @@ python3 -m http.server 8000
 
 ## Hosting (GitHub Pages)
 
-One-time setup after merging to `main`:
+This repo started empty, so its default branch is currently
+`claude/sunder-website-design-87brgq`. Recommended one-time setup:
 
-1. Repo **Settings → Pages**.
-2. Source: **Deploy from a branch**; branch `main`, folder `/ (root)`.
+1. **Settings → Branches** (or **Settings → General → Default branch**):
+   rename the default branch to `main`. GitHub redirects the old name
+   automatically.
+2. **Settings → Pages** → Source: **Deploy from a branch**; branch `main`
+   (or the current default branch if you skip step 1), folder `/ (root)`.
 3. The site publishes at `https://hrazzell.github.io/sunder-website/`.
+
+The absolute URLs in `index.html` (`canonical`, `og:url`, `og:image`,
+`twitter:image`) assume that Pages URL — update them if you later serve the
+site from a custom domain or a different host.
 
 The `.nojekyll` file tells Pages to serve files as-is (no Jekyll build).
 
