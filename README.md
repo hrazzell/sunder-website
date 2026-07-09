@@ -14,7 +14,16 @@ nothing to break.
   update this page when connector maturity or pilot claims change.
 - The site deliberately targets design-partner recruitment, not broad launch,
   per the roadmap's explicit not-now list.
-- The CLI session in the hero is illustrative and labeled as such.
+- The console screenshots in `assets/` are the real `sunder/apps/web` console
+  (dark theme) rendered with representative fixture data via mocked API
+  responses; the footer discloses this. Regenerate after major console UI
+  changes by re-running a similar Playwright harness against `npm run dev`.
+- The evidence JSON in the "prove it" section is excerpted from a real bundle
+  produced by `sunder/scripts/pilot-happy-path.sh`.
+- The CLI session and the Slack approval card are illustrative and labeled as
+  such in their captions.
+- Pilot stat-strip numbers are the success-criteria targets from the
+  design-partner launch assets — keep them in sync with that doc.
 
 ## Local preview
 
