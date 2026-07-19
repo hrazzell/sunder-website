@@ -236,6 +236,8 @@ img { max-width: 100%; height: auto; display: block; }
 }
 .t-prompt { color: var(--accent); font-weight: 700; }
 .t-ok { color: var(--ok); }
+.t-dim { color: var(--text-muted); }
+.t-pub { color: var(--accent-strong); font-weight: 700; }
 .t-sev-orphan { color: var(--sev-red); font-weight: 700; }
 .t-sev-stale { color: var(--sev-amber); font-weight: 700; }
 .t-sev-priv { color: var(--sev-violet); font-weight: 700; }
@@ -485,10 +487,31 @@ img { max-width: 100%; height: auto; display: block; }
 }
 .iface-list dd { color: var(--text-muted); font-size: 0.92rem; }
 
+/* ---------- evidence model ---------- */
+
+.trust-grid { margin-top: 40px; }
+.trust-panel { max-width: 880px; margin: 44px auto 0; }
+.trust-panel code { font-size: 0.76rem; }
+.trust-note {
+  margin: 30px auto 0;
+  max-width: 52em;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
 /* ---------- connectors ---------- */
 
 .connectors { margin-top: 64px; }
 .connectors h3 { margin-bottom: 14px; }
+.connectors-sub {
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  font-weight: 400;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin: 22px 0 12px;
+}
 .connectors-note {
   color: var(--text-muted);
   font-size: 0.9rem;
@@ -524,6 +547,7 @@ img { max-width: 100%; height: auto; display: block; }
 /* ---------- cards & grids ---------- */
 
 .grid { display: grid; gap: 18px; margin-top: 40px; }
+.grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 
 .card {
@@ -715,6 +739,7 @@ img { max-width: 100%; height: auto; display: block; }
   .hero-grid { grid-template-columns: 1fr; gap: 40px; }
   .split { grid-template-columns: 1fr; gap: 36px; }
   .decide-grid { grid-template-columns: 1fr; }
+  .grid-2 { grid-template-columns: 1fr; }
   .grid-3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .stat-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .timeline { grid-template-columns: 1fr; }
