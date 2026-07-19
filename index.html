@@ -4,10 +4,10 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Sunder — Access governance for engineering-led companies</title>
-  <meta name="description" content="Sunder helps security, GRC, and engineering teams understand who has access, review whether it is appropriate, remediate risky access through governed workflows, and export evidence across SaaS and cloud systems.">
+  <meta name="description" content="Sunder helps security, GRC, and engineering teams understand who has access, review whether it is appropriate, remediate risky access through governed workflows, and export evidence across SaaS and cloud systems — on a canonical data plane where every fact carries its provenance.">
   <link rel="canonical" href="https://hrazzell.github.io/sunder-website/">
   <meta property="og:title" content="Sunder — Access governance for engineering-led companies">
-  <meta property="og:description" content="API/CLI/MCP-first identity governance: access graph, findings, reviews, governed remediation, and audit evidence — without a heavyweight IGA suite.">
+  <meta property="og:description" content="API/CLI/MCP-first identity governance: access graph, findings, reviews, governed remediation, and audit evidence — built on a canonical data plane where every fact names its source, sync run, and publication.">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Sunder">
   <meta property="og:url" content="https://hrazzell.github.io/sunder-website/">
@@ -16,7 +16,7 @@
   <meta property="og:image:height" content="630">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Sunder — Access governance for engineering-led companies">
-  <meta name="twitter:description" content="API/CLI/MCP-first identity governance: access graph, findings, reviews, governed remediation, and audit evidence — without a heavyweight IGA suite.">
+  <meta name="twitter:description" content="API/CLI/MCP-first identity governance: access graph, findings, reviews, governed remediation, and audit evidence — built on a canonical data plane where every fact names its source, sync run, and publication.">
   <meta name="twitter:image" content="https://hrazzell.github.io/sunder-website/og-image.png">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="stylesheet" href="style.css">
@@ -28,6 +28,7 @@
     <a class="wordmark" href="#top">sunder<span class="cursor" aria-hidden="true"></span></a>
     <nav class="nav-links" aria-label="Main">
       <a href="#see-it">Product</a>
+      <a href="#trust">Evidence model</a>
       <a href="#interfaces">API &amp; agents</a>
       <a href="#design-partners">Design partners</a>
       <a href="#faq" class="nav-keep">FAQ</a>
@@ -48,7 +49,9 @@
           Understand who has access, review whether it is appropriate,
           remediate risky access through governed workflows, and export
           evidence across SaaS and cloud systems &mdash; API/CLI/MCP-first,
-          without giving up approval boundaries or auditability.
+          without giving up approval boundaries or auditability. Every answer
+          carries its provenance, because an access review is only as good as
+          the data underneath it.
         </p>
         <div class="cta-row">
           <a class="btn btn-primary" href="mailto:hrazzell@gmail.com?subject=Sunder%20design%20partner%20program&amp;body=Company%3A%20%0AHeadcount%3A%20%0ASystems%20to%20scope%20(e.g.%20GitHub%2C%20Okta%2C%20Entra)%3A%20%0ANext%20audit%20or%20review%20deadline%3A%20%0ACurrent%20review%20process%3A%20">Apply for the design partner program</a>
@@ -77,7 +80,9 @@
         accounts, spreadsheets. Auditors and customers ask for a single answer
         &mdash; the data is scattered and stale, so reviews turn into
         screenshot archaeology, and AI agents are multiplying the identities
-        you have to govern.
+        you have to govern. Even tools that aggregate it rarely tell you what
+        the data can actually prove: how fresh it is, whether the sync was
+        complete, or whether &ldquo;absent&rdquo; really means removed.
       </p>
 
       <figure class="diagram" role="img" aria-label="Diagram: scattered access data across systems becomes one normalized access graph in Sunder, with an orphaned account flagged">
@@ -151,6 +156,9 @@
           the graph into findings: orphaned accounts, terminated users with
           live access, privileged access without an owner, unused grants
           &mdash; each with evidence attached, not just a dashboard number.
+          And the graph doesn&rsquo;t overstate access: when a successful full
+          sync stops reporting a grant, Sunder retires it under strict safety
+          rules instead of letting it linger as &ldquo;active&rdquo; forever.
         </p>
       </div>
       <figure class="browser">
@@ -252,8 +260,93 @@
     </div>
   </section>
 
+  <!-- ============ EVIDENCE MODEL ============ -->
+  <section class="section" id="trust">
+    <div class="container">
+      <p class="kicker">/ the evidence model</p>
+      <h2>Answers you can defend, by construction.</h2>
+      <p class="section-lede">
+        Most governance tools show you a dashboard and ask you to trust it.
+        Sunder is being rebuilt on a canonical data plane &mdash; landing with
+        design-partner pilots &mdash; where trust is structural: every fact
+        knows where it came from, syncs land atomically or not at all, and the
+        system tells you plainly what each source can and cannot prove.
+      </p>
+
+      <div class="grid grid-2 trust-grid">
+        <div class="card">
+          <h3>Syncs land atomically &mdash; or not at all</h3>
+          <p>
+            Each connector sync commits as one sealed, numbered publication
+            with a receipt: graph changes, observations, cursors, and evidence
+            advance together. Reviewers never see a half-applied sync, and a
+            listing never silently mixes two different states of the world.
+          </p>
+        </div>
+        <div class="card">
+          <h3>Every fact carries provenance</h3>
+          <p>
+            Each observation names the exact tenant, system, connector, scope,
+            collection, sync run, and publication that produced it. When an
+            auditor asks &ldquo;how do you know?&rdquo;, the answer is in the
+            record &mdash; not in someone&rsquo;s memory of a sync job.
+          </p>
+        </div>
+        <div class="card">
+          <h3>Absence is proven, not assumed</h3>
+          <p>
+            &ldquo;Access removed&rdquo; is only concluded from a complete,
+            comparable enumeration of the exact collection that owned it.
+            Partial, failed, or permission-limited syncs never silently delete
+            &mdash; and a grant observed by two sources survives the loss of
+            one.
+          </p>
+        </div>
+        <div class="card">
+          <h3>Authority is policy, not write order</h3>
+          <p>
+            HR sources own workforce truth &mdash; lifecycle, manager,
+            employment &mdash; by explicit, versioned policy. An application
+            connector can never silently become the authority on a person, and
+            when equally ranked sources disagree, Sunder records a visible
+            conflict instead of letting the last write win.
+          </p>
+        </div>
+      </div>
+
+      <figure class="terminal trust-panel" aria-label="Illustrative Data Trust readout">
+        <figcaption class="terminal-bar">
+          <span class="tdot" aria-hidden="true"></span><span class="tdot" aria-hidden="true"></span><span class="tdot" aria-hidden="true"></span>
+          <span class="terminal-title">Sunder console &mdash; Data Trust (illustrative)</span>
+        </figcaption>
+        <pre><code><span class="t-dim">system github-prod &middot; publication</span> <span class="t-pub">v41</span> <span class="t-dim">&middot; receipt 3c9f&hellip; &middot; evaluated 09:12 UTC</span>
+
+hr.workers               <span class="t-ok">complete</span> &middot; <span class="t-ok">fresh</span> &middot; workforce authority: <span class="t-pub">primary</span>
+github.members           <span class="t-ok">complete</span> &middot; <span class="t-ok">fresh</span> &middot; absence: <span class="t-ok">authoritative</span>
+github.teams             <span class="t-ok">complete</span> &middot; <span class="t-ok">fresh</span> &middot; absence: <span class="t-ok">authoritative</span>
+github.team_memberships  <span class="t-ok">complete</span> &middot; <span class="t-ok">fresh</span> &middot; deps satisfied: members, teams
+entra.pim_eligibilities  <span class="t-sev-stale">permission-limited</span> &middot; absence: <span class="t-sev-stale">not claimed</span>
+                         <span class="t-dim">caveat: active directory roles retained; PIM read lost</span></code></pre>
+        <p class="terminal-note">
+          Illustrative Data Trust readout, modeled on the canonical console
+          views currently in final review &mdash; per-collection completeness,
+          freshness, absence authority, and explicit caveats, all pinned to
+          one publication.
+        </p>
+      </figure>
+
+      <p class="trust-note">
+        The canonical data plane is merged and certified behind a strict
+        contract suite on PostgreSQL and SQLite; it activates for pilots in
+        one clean cutover rather than a risky in-place migration. Until then,
+        pilots run on today&rsquo;s shipped governance loop &mdash; and we
+        will tell you plainly which guarantees apply to which.
+      </p>
+    </div>
+  </section>
+
   <!-- ============ API & AGENTS ============ -->
-  <section class="section" id="interfaces">
+  <section class="section section-alt" id="interfaces">
     <div class="container split">
       <div class="split-copy">
         <p class="kicker">/ api &amp; agents</p>
@@ -261,10 +354,11 @@
         <p class="section-lede">
           REST is the single external control plane &mdash; the console, the
           CLI, chat delivery, and the MCP server are all clients of the same
-          audited API.
+          audited API. Nothing writes around it, so approval boundaries and
+          audit trails hold no matter which surface acts.
         </p>
         <dl class="iface-list">
-          <div><dt>REST API</dt><dd>Every governance operation is a documented call with OIDC auth and audit logging.</dd></div>
+          <div><dt>REST API</dt><dd>Every governance operation is a documented call with OIDC auth, fine-grained capabilities, and audit logging.</dd></div>
           <div><dt>Operator CLI</dt><dd>Scriptable <code>sunder</code> commands, 1:1 with the API, with <code>--dry-run</code> everywhere.</dd></div>
           <div><dt>MCP server</dt><dd>Agents ask governed questions and submit bounded requests &mdash; never autonomous destructive changes.</dd></div>
           <div><dt>Web + chat</dt><dd>Governance Inbox baseline; configurable Slack/Teams delivery; documented fallbacks.</dd></div>
@@ -294,24 +388,28 @@
     </div>
 
     <div class="container connectors">
-      <h3>Connectors today</h3>
+      <h3>Connectors</h3>
+      <h4 class="connectors-sub">Canonical pilot set &mdash; certified against the canonical sync contract</h4>
       <ul class="chip-list">
+        <li class="chip">HR CSV / JSON <span class="chip-tag">workforce authority</span></li>
         <li class="chip">GitHub <span class="chip-tag">read &middot; opt-in team writes</span></li>
-        <li class="chip">Okta <span class="chip-tag">read</span></li>
         <li class="chip">Microsoft Entra <span class="chip-tag">read &middot; provisioning</span></li>
+      </ul>
+      <h4 class="connectors-sub">Additional sources today &mdash; varying maturity, moving onto the canonical contract next</h4>
+      <ul class="chip-list">
+        <li class="chip">Okta <span class="chip-tag">read</span></li>
         <li class="chip">Google Workspace <span class="chip-tag">read</span></li>
         <li class="chip">Slack <span class="chip-tag">read</span></li>
         <li class="chip">SCIM <span class="chip-tag">read &middot; provisioning</span></li>
         <li class="chip">LDAP <span class="chip-tag">read</span></li>
         <li class="chip">REST sources <span class="chip-tag">generic</span></li>
-        <li class="chip">HR CSV / JSON <span class="chip-tag">import</span></li>
       </ul>
-      <p class="connectors-note">Supported at varying maturity &mdash; read-only is the preferred pilot posture; writes are opt-in, approval-bounded, and reconciled after action. AWS and broader cloud connectors are planned: the long-term bet is a strict connector contract and conformance harness, so the marginal connector is cheap.</p>
+      <p class="connectors-note">Read-only is the preferred pilot posture; writes are opt-in, approval-bounded, and reconciled after action. Each canonical connector is certified per collection &mdash; what it enumerates, what absence it may claim, and which dependencies it needs &mdash; so &ldquo;supported&rdquo; means something specific. AWS and broader cloud connectors are planned: the long-term bet is a strict connector contract and conformance harness, so the marginal connector is cheap.</p>
     </div>
   </section>
 
   <!-- ============ WHAT SUNDER IS NOT ============ -->
-  <section class="section section-alt" id="not">
+  <section class="section" id="not">
     <div class="container narrow">
       <p class="kicker">/ scope, honestly</p>
       <h2>What Sunder is not.</h2>
@@ -326,7 +424,7 @@
   </section>
 
   <!-- ============ DESIGN PARTNER PROGRAM ============ -->
-  <section class="section" id="design-partners">
+  <section class="section section-alt" id="design-partners">
     <div class="container">
       <p class="kicker">/ design partner program</p>
       <h2>We are selecting 3&ndash;5 design partners for hands-on pilots.</h2>
@@ -401,7 +499,7 @@
   </section>
 
   <!-- ============ FAQ ============ -->
-  <section class="section section-alt" id="faq">
+  <section class="section" id="faq">
     <div class="container narrow">
       <p class="kicker">/ security &amp; compliance faq</p>
       <h2>The questions your security team will ask.</h2>
@@ -417,6 +515,18 @@
         <details>
           <summary>Do you need production credentials?</summary>
           <p>Only customer-approved scopes for selected systems. Exports or fixtures can be used first where appropriate.</p>
+        </details>
+        <details>
+          <summary>What happens when a sync fails halfway?</summary>
+          <p>Nothing you have to distrust. On Sunder&rsquo;s canonical data plane, a sync commits as one atomic, numbered publication with a receipt &mdash; the graph either advances to a complete new state or stays exactly where it was. Partial reads never leak into what reviewers see, and a lost response is recovered from the receipt rather than re-applied.</p>
+        </details>
+        <details>
+          <summary>How do you avoid falsely concluding access was removed?</summary>
+          <p>Absence has to be earned. A grant is only retired when the collection that owns it completes a full, comparable enumeration that omits it &mdash; today&rsquo;s shipped sync path already enforces this with strict safety rules, and the canonical model deepens it with per-source observations, so evidence from one source is never erased by another source&rsquo;s bad day.</p>
+        </details>
+        <details>
+          <summary>Which system wins when sources disagree about a person?</summary>
+          <p>An explicit, versioned authority policy &mdash; not write order. HR sources own workforce lifecycle by default; an IdP can be a configured fallback; application connectors can never silently become the authority. Equal-rank disagreement is recorded as a visible conflict with both claims kept as provenance.</p>
         </details>
         <details>
           <summary>Can Sunder support auditors?</summary>
@@ -451,7 +561,7 @@
 <footer class="footer">
   <div class="container footer-inner">
     <span class="wordmark wordmark-sm">sunder<span class="cursor" aria-hidden="true"></span></span>
-    <p>&copy; 2026 Sunder. Proprietary software; source access for customers by written agreement. Console screenshots show fixture data.</p>
+    <p>&copy; 2026 Sunder. Proprietary software; source access for customers by written agreement. Console screenshots show fixture data; the Data Trust readout is illustrative of in-review functionality.</p>
     <a href="mailto:hrazzell@gmail.com">Contact</a>
   </div>
 </footer>
