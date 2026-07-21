@@ -1,0 +1,93 @@
+name: Inspect Clarent live site
+
+on:
+  push:
+    branches:
+      - agent/inspect-clarent-live
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Fetch HTML, headers, and linked assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p output/assets
+          curl --fail --silent --show-error --location \
+            --dump-header output/headers.txt \
+            --output output/index.html \
+            https://clarentadvisory.co.nz/
+
+          python3 - <<'PY'
+          from html.parser import HTMLParser
+          from pathlib import Path
+          from urllib.parse import urljoin, urlparse
+          from urllib.request import Request, urlopen
+          import hashlib
+          import json
+
+          base = "https://clarentadvisory.co.nz/"
+          html = Path("output/index.html").read_text(encoding="utf-8", errors="replace")
+
+          class Parser(HTMLParser):
+              def __init__(self):
+                  super().__init__()
+                  self.assets = []
+                  self.meta = []
+              def handle_starttag(self, tag, attrs):
+                  data = dict(attrs)
+                  if tag == "link" and data.get("href"):
+                      rel = data.get("rel", "")
+                      if any(token in rel for token in ("stylesheet", "preload", "modulepreload")):
+                          self.assets.append(data["href"])
+                  elif tag == "script" and data.get("src"):
+                      self.assets.append(data["src"])
+                  if tag == "meta":
+                      self.meta.append(data)
+
+          parser = Parser()
+          parser.feed(html)
+          urls = []
+          for raw in parser.assets:
+              absolute = urljoin(base, raw)
+              if absolute.startswith(("http://", "https://")) and absolute not in urls:
+                  urls.append(absolute)
+
+          manifest = {"base": base, "meta": parser.meta, "assets": []}
+          for index, url in enumerate(urls, 1):
+              parsed = urlparse(url)
+              suffix = Path(parsed.path).suffix or ".bin"
+              digest = hashlib.sha256(url.encode()).hexdigest()[:12]
+              target = Path("output/assets") / f"{index:02d}-{digest}{suffix}"
+              record = {"url": url, "file": str(target)}
+              try:
+                  request = Request(url, headers={"User-Agent": "Mozilla/5.0 ClarentMobileAudit/1.0"})
+                  with urlopen(request, timeout=30) as response:
+                      body = response.read()
+                      target.write_bytes(body)
+                      record.update({
+                          "status": response.status,
+                          "content_type": response.headers.get("content-type"),
+                          "bytes": len(body),
+                      })
+              except Exception as exc:
+                  record["error"] = repr(exc)
+              manifest["assets"].append(record)
+
+          Path("output/manifest.json").write_text(json.dumps(manifest, indent=2), encoding="utf-8")
+          PY
+
+          find output -maxdepth 2 -type f -printf '%p %s bytes\n' | sort
+
+      - name: Upload inspection bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: clarent-live-source
+          path: output
+          if-no-files-found: error
+          retention-days: 1
