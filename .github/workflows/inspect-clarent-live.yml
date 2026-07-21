@@ -1,93 +1,281 @@
-name: Inspect Clarent live site
+name: Inspect and verify Clarent mobile table
 
 on:
   pull_request:
-    branches:
-      - main
+    branches: [main]
 
 permissions:
   contents: read
 
 jobs:
-  inspect:
+  verify:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
     steps:
-      - name: Fetch HTML, headers, and linked assets
+      - name: Capture live page and apply responsive table patch
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p output/assets
+          mkdir -p output/original output/fixed output/screens
           curl --fail --silent --show-error --location \
             --dump-header output/headers.txt \
-            --output output/index.html \
+            --output output/original/index.html \
             https://clarentadvisory.co.nz/
 
+          cp output/original/index.html output/fixed/index.html
           python3 - <<'PY'
-          from html.parser import HTMLParser
           from pathlib import Path
-          from urllib.parse import urljoin, urlparse
-          from urllib.request import Request, urlopen
-          import hashlib
-          import json
+          import re
 
-          base = "https://clarentadvisory.co.nz/"
-          html = Path("output/index.html").read_text(encoding="utf-8", errors="replace")
+          path = Path('output/fixed/index.html')
+          html = path.read_text(encoding='utf-8')
+          headers = ['Offering', 'Who', "What's Happening", "What They're Feeling", 'Why Clarent']
 
-          class Parser(HTMLParser):
-              def __init__(self):
-                  super().__init__()
-                  self.assets = []
-                  self.meta = []
-              def handle_starttag(self, tag, attrs):
-                  data = dict(attrs)
-                  if tag == "link" and data.get("href"):
-                      rel = data.get("rel", "")
-                      if any(token in rel for token in ("stylesheet", "preload", "modulepreload")):
-                          self.assets.append(data["href"])
-                  elif tag == "script" and data.get("src"):
-                      self.assets.append(data["src"])
-                  if tag == "meta":
-                      self.meta.append(data)
+          for label in headers:
+              old = f'<th style="width:20%;">{label}</th>'
+              new = f'<th scope="col" style="width:20%;">{label}</th>'
+              if old not in html:
+                  raise SystemExit(f'Missing expected header: {label}')
+              html = html.replace(old, new, 1)
 
-          parser = Parser()
-          parser.feed(html)
-          urls = []
-          for raw in parser.assets:
-              absolute = urljoin(base, raw)
-              if absolute.startswith(("http://", "https://")) and absolute not in urls:
-                  urls.append(absolute)
+          match = re.search(r'(<table class="lens-table">.*?<tbody>)(.*?)(</tbody>\s*</table>)', html, re.S)
+          if not match:
+              raise SystemExit('Client Buying Lens table not found')
+          body = match.group(2)
+          rows = re.findall(r'<tr>(.*?)</tr>', body, re.S)
+          if len(rows) != 6:
+              raise SystemExit(f'Expected six rows, found {len(rows)}')
 
-          manifest = {"base": base, "meta": parser.meta, "assets": []}
-          for index, url in enumerate(urls, 1):
-              parsed = urlparse(url)
-              suffix = Path(parsed.path).suffix or ".bin"
-              digest = hashlib.sha256(url.encode()).hexdigest()[:12]
-              target = Path("output/assets") / f"{index:02d}-{digest}{suffix}"
-              record = {"url": url, "file": str(target)}
-              try:
-                  request = Request(url, headers={"User-Agent": "Mozilla/5.0 ClarentMobileAudit/1.0"})
-                  with urlopen(request, timeout=30) as response:
-                      body = response.read()
-                      target.write_bytes(body)
-                      record.update({
-                          "status": response.status,
-                          "content_type": response.headers.get("content-type"),
-                          "bytes": len(body),
-                      })
-              except Exception as exc:
-                  record["error"] = repr(exc)
-              manifest["assets"].append(record)
+          for row in rows:
+              position = [0]
+              def label_cell(cell_match):
+                  index = position[0]
+                  if index >= len(headers):
+                      raise SystemExit('A row has more than five cells')
+                  position[0] += 1
+                  return f'<td{cell_match.group(1)} data-label="{headers[index]}">'
+              updated = re.sub(r'<td([^>]*)>', label_cell, row)
+              if position[0] != 5:
+                  raise SystemExit(f'A row has {position[0]} cells, expected five')
+              body = body.replace(row, updated, 1)
 
-          Path("output/manifest.json").write_text(json.dumps(manifest, indent=2), encoding="utf-8")
+          html = html[:match.start(2)] + body + html[match.end(2):]
+          css = r'''
+
+          /* Client Buying Lens: keep the comparison table on larger screens, and
+             present each offering as a labelled card where five columns cannot fit. */
+          @media (max-width: 960px) {
+            .lens-table-wrap { padding: 0; overflow: visible; }
+            .lens-table {
+              display: block;
+              width: 100%;
+              table-layout: auto;
+              border-collapse: separate;
+              border-spacing: 0;
+            }
+            .lens-table thead {
+              position: absolute;
+              width: 1px;
+              height: 1px;
+              padding: 0;
+              margin: -1px;
+              overflow: hidden;
+              clip: rect(0, 0, 0, 0);
+              clip-path: inset(50%);
+              white-space: nowrap;
+              border: 0;
+            }
+            .lens-table tbody { display: grid; width: 100%; gap: 1rem; }
+            .lens-table tr {
+              display: block;
+              width: 100%;
+              overflow: hidden;
+              background: var(--off-white);
+              border: 1px solid var(--warm-border);
+              border-radius: 2px;
+            }
+            .lens-table td {
+              display: grid;
+              grid-template-columns: minmax(7.5rem, 34%) minmax(0, 1fr);
+              align-items: start;
+              gap: 0.75rem;
+              width: 100%;
+              padding: 0.85rem 1rem;
+              background: transparent !important;
+              border-bottom: 0.5px solid var(--warm-border);
+              overflow-wrap: anywhere;
+              hyphens: auto;
+            }
+            .lens-table td::before {
+              content: attr(data-label);
+              color: var(--teal);
+              font-size: 9px;
+              font-weight: 600;
+              line-height: 1.45;
+              letter-spacing: 0.1em;
+              text-transform: uppercase;
+            }
+            .lens-table td.offer-name {
+              display: block;
+              padding: 1rem;
+              background: var(--slate) !important;
+              color: var(--off-white);
+              font-size: 1.1rem;
+              line-height: 1.35;
+            }
+            .lens-table td.offer-name::before { display: none; }
+            .lens-table td:last-child { border-bottom: 0; }
+          }
+          @media (max-width: 420px) {
+            .lens-table td:not(.offer-name) {
+              grid-template-columns: minmax(0, 1fr);
+              gap: 0.3rem;
+            }
+          }
+          '''
+          html = html.replace('\n</style>', css + '\n</style>', 1)
+          path.write_text(html, encoding='utf-8')
           PY
 
-          find output -maxdepth 2 -type f -printf '%p %s bytes\n' | sort
+          diff -u output/original/index.html output/fixed/index.html > output/clarent-mobile-table.patch || true
 
-      - name: Upload inspection bundle
+      - name: Install browser driver
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm init -y >/dev/null
+          npm install --no-audit --no-fund --silent playwright@1.61.1
+          echo "CHROME_PATH=$(command -v google-chrome || command -v chromium)" >> "$GITHUB_ENV"
+
+      - name: Verify phone, tablet, and desktop layouts
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > verify.cjs <<'NODE'
+          const { chromium } = require('playwright');
+          const fs = require('fs');
+          const path = require('path');
+          const { pathToFileURL } = require('url');
+
+          const cases = [
+            ['original-375', 'output/original/index.html', 375, 812, 'original'],
+            ['fixed-320', 'output/fixed/index.html', 320, 800, 'stacked'],
+            ['fixed-375', 'output/fixed/index.html', 375, 812, 'stacked'],
+            ['fixed-430', 'output/fixed/index.html', 430, 932, 'cards'],
+            ['fixed-768', 'output/fixed/index.html', 768, 1024, 'cards'],
+            ['fixed-960', 'output/fixed/index.html', 960, 1000, 'cards'],
+            ['fixed-1024', 'output/fixed/index.html', 1024, 900, 'desktop'],
+            ['fixed-1440', 'output/fixed/index.html', 1440, 1000, 'desktop'],
+          ];
+
+          (async () => {
+            const browser = await chromium.launch({
+              executablePath: process.env.CHROME_PATH,
+              headless: true,
+              args: ['--no-sandbox', '--disable-dev-shm-usage'],
+            });
+            const results = [];
+
+            for (const [name, file, width, height, mode] of cases) {
+              const context = await browser.newContext({ viewport: { width, height }, colorScheme: 'light' });
+              await context.route(/^https?:\/\//, route => route.abort());
+              const page = await context.newPage();
+              const pageErrors = [];
+              page.on('pageerror', error => pageErrors.push(String(error)));
+              await page.goto(pathToFileURL(path.resolve(file)).href, { waitUntil: 'domcontentloaded' });
+              await page.locator('.lens-block').waitFor({ state: 'visible' });
+
+              const metrics = await page.evaluate(() => {
+                const table = document.querySelector('.lens-table');
+                const wrap = document.querySelector('.lens-table-wrap');
+                const thead = table.querySelector('thead');
+                const tbody = table.querySelector('tbody');
+                const row = tbody.querySelector('tr');
+                const cells = [...row.querySelectorAll('td')];
+                const allCells = [...tbody.querySelectorAll('td')];
+                const rect = el => el.getBoundingClientRect();
+                return {
+                  viewportWidth: innerWidth,
+                  documentScrollWidth: document.documentElement.scrollWidth,
+                  horizontalOverflow: document.documentElement.scrollWidth > innerWidth + 1,
+                  tableWidth: +rect(table).width.toFixed(2),
+                  wrapWidth: +rect(wrap).width.toFixed(2),
+                  tableDisplay: getComputedStyle(table).display,
+                  tableLayout: getComputedStyle(table).tableLayout,
+                  theadPosition: getComputedStyle(thead).position,
+                  theadWidth: +rect(thead).width.toFixed(2),
+                  theadHeight: +rect(thead).height.toFixed(2),
+                  tbodyDisplay: getComputedStyle(tbody).display,
+                  rowDisplay: getComputedStyle(row).display,
+                  firstCellDisplay: getComputedStyle(cells[0]).display,
+                  secondCellDisplay: getComputedStyle(cells[1]).display,
+                  secondCellColumns: getComputedStyle(cells[1]).gridTemplateColumns,
+                  pseudoLabel: getComputedStyle(cells[1], '::before').content,
+                  rows: tbody.querySelectorAll('tr').length,
+                  cells: allCells.length,
+                  labelledCells: allCells.filter(cell => cell.hasAttribute('data-label')).length,
+                  scopedHeaders: table.querySelectorAll('th[scope="col"]').length,
+                };
+              });
+
+              const checks = [];
+              const check = (condition, message) => checks.push({ pass: !!condition, message });
+              check(metrics.rows === 6, 'six service rows render');
+              check(metrics.cells === 30, 'thirty data cells render');
+              check(pageErrors.length === 0, 'no page errors');
+
+              if (name.startsWith('fixed-')) {
+                check(metrics.labelledCells === 30, 'all cells have mobile labels');
+                check(metrics.scopedHeaders === 5, 'all headers have column scope');
+                check(!metrics.horizontalOverflow, 'no horizontal overflow');
+                check(metrics.tableWidth <= metrics.wrapWidth + 1, 'table stays inside wrapper');
+              }
+
+              if (mode === 'stacked' || mode === 'cards') {
+                check(metrics.tableDisplay === 'block', 'table becomes card container');
+                check(metrics.tbodyDisplay === 'grid', 'cards have grid spacing');
+                check(metrics.rowDisplay === 'block', 'each row becomes a card');
+                check(metrics.firstCellDisplay === 'block', 'offering is card header');
+                check(metrics.secondCellDisplay === 'grid', 'detail cell is labelled grid');
+                check(metrics.theadPosition === 'absolute' && metrics.theadWidth <= 1.1 && metrics.theadHeight <= 1.1, 'visual table header is clipped accessibly');
+                check(metrics.pseudoLabel.includes('Who'), 'mobile label renders');
+                check(mode !== 'stacked' || !metrics.secondCellColumns.includes(' '), 'narrow phone stacks label above value');
+                check(mode !== 'cards' || metrics.secondCellColumns.includes(' '), 'larger mobile uses label/value columns');
+              }
+
+              if (mode === 'desktop') {
+                check(metrics.tableLayout === 'fixed', 'desktop retains fixed comparison table');
+                check(metrics.rowDisplay === 'table-row', 'desktop rows remain table rows');
+                check(metrics.firstCellDisplay === 'table-cell', 'desktop cells remain table cells');
+                check(metrics.theadWidth > 1, 'desktop headers remain visible');
+              }
+
+              await page.evaluate(() => {
+                const target = document.querySelector('.lens-block');
+                window.scrollTo(0, target.getBoundingClientRect().top + scrollY - 24);
+              });
+              await page.waitForTimeout(100);
+              await page.screenshot({ path: `output/screens/${name}-viewport.png` });
+              await page.locator('.lens-block').screenshot({ path: `output/screens/${name}-section.png` });
+
+              const failed = checks.filter(item => !item.pass).map(item => item.message);
+              results.push({ name, width, height, mode, metrics, pageErrors, checks, passed: failed.length === 0, failed });
+              console.log(`${failed.length ? 'FAIL' : 'PASS'} ${name}`, JSON.stringify(metrics));
+              failed.forEach(message => console.log(`  - ${message}`));
+              await context.close();
+            }
+
+            await browser.close();
+            fs.writeFileSync('output/browser-verification.json', JSON.stringify({ results }, null, 2));
+            if (results.some(result => !result.passed)) process.exit(1);
+          })();
+          NODE
+          node verify.cjs
+
+      - name: Upload fixed page and verification evidence
         uses: actions/upload-artifact@v4
         with:
-          name: clarent-live-source
+          name: clarent-mobile-table-fix
           path: output
           if-no-files-found: error
           retention-days: 1
