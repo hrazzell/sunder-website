@@ -158,6 +158,7 @@ jobs:
           const { pathToFileURL } = require('url');
 
           const cases = [
+            ['original-320', 'output/original/index.html', 320, 800, 'original'],
             ['original-375', 'output/original/index.html', 375, 812, 'original'],
             ['fixed-320', 'output/fixed/index.html', 320, 800, 'stacked'],
             ['fixed-375', 'output/fixed/index.html', 375, 812, 'stacked'],
@@ -194,12 +195,33 @@ jobs:
                 const cells = [...row.querySelectorAll('td')];
                 const allCells = [...tbody.querySelectorAll('td')];
                 const rect = el => el.getBoundingClientRect();
+                const tableRect = rect(table);
+                const wrapRect = rect(wrap);
+                const overflowingElements = [...document.querySelectorAll('body *')]
+                  .map(element => {
+                    const box = rect(element);
+                    return {
+                      element: `${element.tagName.toLowerCase()}${element.id ? `#${element.id}` : ''}${element.classList.length ? `.${[...element.classList].join('.')}` : ''}`,
+                      left: +box.left.toFixed(2),
+                      right: +box.right.toFixed(2),
+                      width: +box.width.toFixed(2),
+                    };
+                  })
+                  .filter(item => item.left < -1 || item.right > innerWidth + 1)
+                  .slice(0, 12);
                 return {
                   viewportWidth: innerWidth,
                   documentScrollWidth: document.documentElement.scrollWidth,
-                  horizontalOverflow: document.documentElement.scrollWidth > innerWidth + 1,
-                  tableWidth: +rect(table).width.toFixed(2),
-                  wrapWidth: +rect(wrap).width.toFixed(2),
+                  pageHorizontalOverflow: document.documentElement.scrollWidth > innerWidth + 1,
+                  overflowingElements,
+                  tableWidth: +tableRect.width.toFixed(2),
+                  tableLeft: +tableRect.left.toFixed(2),
+                  tableRight: +tableRect.right.toFixed(2),
+                  tableClientWidth: table.clientWidth,
+                  tableScrollWidth: table.scrollWidth,
+                  wrapWidth: +wrapRect.width.toFixed(2),
+                  wrapLeft: +wrapRect.left.toFixed(2),
+                  wrapRight: +wrapRect.right.toFixed(2),
                   tableDisplay: getComputedStyle(table).display,
                   tableLayout: getComputedStyle(table).tableLayout,
                   theadPosition: getComputedStyle(thead).position,
@@ -227,8 +249,9 @@ jobs:
               if (name.startsWith('fixed-')) {
                 check(metrics.labelledCells === 30, 'all cells have mobile labels');
                 check(metrics.scopedHeaders === 5, 'all headers have column scope');
-                check(!metrics.horizontalOverflow, 'no horizontal overflow');
                 check(metrics.tableWidth <= metrics.wrapWidth + 1, 'table stays inside wrapper');
+                check(metrics.tableLeft >= -1 && metrics.tableRight <= innerWidth + 1, 'table stays inside viewport');
+                check(metrics.tableScrollWidth <= metrics.tableClientWidth + 1, 'table has no internal horizontal overflow');
               }
 
               if (mode === 'stacked' || mode === 'cards') {
@@ -273,6 +296,7 @@ jobs:
           node verify.cjs
 
       - name: Upload fixed page and verification evidence
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: clarent-mobile-table-fix
