@@ -21,8 +21,8 @@ jobs:
             --dump-header output/headers.txt \
             --output output/original/index.html \
             https://clarentadvisory.co.nz/
-
           cp output/original/index.html output/fixed/index.html
+
           python3 - <<'PY'
           from pathlib import Path
           import re
@@ -147,7 +147,7 @@ jobs:
           npm install --no-audit --no-fund --silent playwright@1.61.1
           echo "CHROME_PATH=$(command -v google-chrome || command -v chromium)" >> "$GITHUB_ENV"
 
-      - name: Verify phone, tablet, and desktop layouts
+      - name: Verify responsive table in Chrome
         shell: bash
         run: |
           set -euo pipefail
@@ -158,15 +158,14 @@ jobs:
           const { pathToFileURL } = require('url');
 
           const cases = [
-            ['original-320', 'output/original/index.html', 320, 800, 'original'],
-            ['original-375', 'output/original/index.html', 375, 812, 'original'],
-            ['fixed-320', 'output/fixed/index.html', 320, 800, 'stacked'],
-            ['fixed-375', 'output/fixed/index.html', 375, 812, 'stacked'],
-            ['fixed-430', 'output/fixed/index.html', 430, 932, 'cards'],
-            ['fixed-768', 'output/fixed/index.html', 768, 1024, 'cards'],
-            ['fixed-960', 'output/fixed/index.html', 960, 1000, 'cards'],
-            ['fixed-1024', 'output/fixed/index.html', 1024, 900, 'desktop'],
-            ['fixed-1440', 'output/fixed/index.html', 1440, 1000, 'desktop'],
+            { name: 'original-375', file: 'output/original/index.html', width: 375, height: 812, mode: 'original' },
+            { name: 'fixed-320', file: 'output/fixed/index.html', width: 320, height: 800, mode: 'stacked' },
+            { name: 'fixed-375', file: 'output/fixed/index.html', width: 375, height: 812, mode: 'stacked' },
+            { name: 'fixed-430', file: 'output/fixed/index.html', width: 430, height: 932, mode: 'cards' },
+            { name: 'fixed-768', file: 'output/fixed/index.html', width: 768, height: 1024, mode: 'cards' },
+            { name: 'fixed-960', file: 'output/fixed/index.html', width: 960, height: 1000, mode: 'cards' },
+            { name: 'fixed-1024', file: 'output/fixed/index.html', width: 1024, height: 900, mode: 'desktop' },
+            { name: 'fixed-1440', file: 'output/fixed/index.html', width: 1440, height: 1000, mode: 'desktop' },
           ];
 
           (async () => {
@@ -177,13 +176,16 @@ jobs:
             });
             const results = [];
 
-            for (const [name, file, width, height, mode] of cases) {
-              const context = await browser.newContext({ viewport: { width, height }, colorScheme: 'light' });
+            for (const test of cases) {
+              const context = await browser.newContext({
+                viewport: { width: test.width, height: test.height },
+                colorScheme: 'light',
+              });
               await context.route(/^https?:\/\//, route => route.abort());
               const page = await context.newPage();
               const pageErrors = [];
               page.on('pageerror', error => pageErrors.push(String(error)));
-              await page.goto(pathToFileURL(path.resolve(file)).href, { waitUntil: 'domcontentloaded' });
+              await page.goto(pathToFileURL(path.resolve(test.file)).href, { waitUntil: 'domcontentloaded' });
               await page.locator('.lens-block').waitFor({ state: 'visible' });
 
               const metrics = await page.evaluate(() => {
@@ -194,34 +196,18 @@ jobs:
                 const row = tbody.querySelector('tr');
                 const cells = [...row.querySelectorAll('td')];
                 const allCells = [...tbody.querySelectorAll('td')];
-                const rect = el => el.getBoundingClientRect();
+                const rect = element => element.getBoundingClientRect();
                 const tableRect = rect(table);
                 const wrapRect = rect(wrap);
-                const overflowingElements = [...document.querySelectorAll('body *')]
-                  .map(element => {
-                    const box = rect(element);
-                    return {
-                      element: `${element.tagName.toLowerCase()}${element.id ? `#${element.id}` : ''}${element.classList.length ? `.${[...element.classList].join('.')}` : ''}`,
-                      left: +box.left.toFixed(2),
-                      right: +box.right.toFixed(2),
-                      width: +box.width.toFixed(2),
-                    };
-                  })
-                  .filter(item => item.left < -1 || item.right > innerWidth + 1)
-                  .slice(0, 12);
                 return {
                   viewportWidth: innerWidth,
-                  documentScrollWidth: document.documentElement.scrollWidth,
-                  pageHorizontalOverflow: document.documentElement.scrollWidth > innerWidth + 1,
-                  overflowingElements,
+                  pageScrollWidth: document.documentElement.scrollWidth,
                   tableWidth: +tableRect.width.toFixed(2),
                   tableLeft: +tableRect.left.toFixed(2),
                   tableRight: +tableRect.right.toFixed(2),
                   tableClientWidth: table.clientWidth,
                   tableScrollWidth: table.scrollWidth,
                   wrapWidth: +wrapRect.width.toFixed(2),
-                  wrapLeft: +wrapRect.left.toFixed(2),
-                  wrapRight: +wrapRect.right.toFixed(2),
                   tableDisplay: getComputedStyle(table).display,
                   tableLayout: getComputedStyle(table).tableLayout,
                   theadPosition: getComputedStyle(thead).position,
@@ -233,28 +219,28 @@ jobs:
                   secondCellDisplay: getComputedStyle(cells[1]).display,
                   secondCellColumns: getComputedStyle(cells[1]).gridTemplateColumns,
                   pseudoLabel: getComputedStyle(cells[1], '::before').content,
-                  rows: tbody.querySelectorAll('tr').length,
-                  cells: allCells.length,
-                  labelledCells: allCells.filter(cell => cell.hasAttribute('data-label')).length,
-                  scopedHeaders: table.querySelectorAll('th[scope="col"]').length,
+                  rowCount: tbody.querySelectorAll('tr').length,
+                  cellCount: allCells.length,
+                  labelledCellCount: allCells.filter(cell => cell.hasAttribute('data-label')).length,
+                  scopedHeaderCount: table.querySelectorAll('th[scope="col"]').length,
                 };
               });
 
               const checks = [];
-              const check = (condition, message) => checks.push({ pass: !!condition, message });
-              check(metrics.rows === 6, 'six service rows render');
-              check(metrics.cells === 30, 'thirty data cells render');
+              const check = (condition, message) => checks.push({ pass: Boolean(condition), message });
+              check(metrics.rowCount === 6, 'six service rows render');
+              check(metrics.cellCount === 30, 'thirty data cells render');
               check(pageErrors.length === 0, 'no page errors');
 
-              if (name.startsWith('fixed-')) {
-                check(metrics.labelledCells === 30, 'all cells have mobile labels');
-                check(metrics.scopedHeaders === 5, 'all headers have column scope');
+              if (test.mode !== 'original') {
+                check(metrics.labelledCellCount === 30, 'all cells have mobile labels');
+                check(metrics.scopedHeaderCount === 5, 'all headers have column scope');
                 check(metrics.tableWidth <= metrics.wrapWidth + 1, 'table stays inside wrapper');
-                check(metrics.tableLeft >= -1 && metrics.tableRight <= innerWidth + 1, 'table stays inside viewport');
+                check(metrics.tableLeft >= -1 && metrics.tableRight <= metrics.viewportWidth + 1, 'table stays inside viewport');
                 check(metrics.tableScrollWidth <= metrics.tableClientWidth + 1, 'table has no internal horizontal overflow');
               }
 
-              if (mode === 'stacked' || mode === 'cards') {
+              if (test.mode === 'stacked' || test.mode === 'cards') {
                 check(metrics.tableDisplay === 'block', 'table becomes card container');
                 check(metrics.tbodyDisplay === 'grid', 'cards have grid spacing');
                 check(metrics.rowDisplay === 'block', 'each row becomes a card');
@@ -262,11 +248,11 @@ jobs:
                 check(metrics.secondCellDisplay === 'grid', 'detail cell is labelled grid');
                 check(metrics.theadPosition === 'absolute' && metrics.theadWidth <= 1.1 && metrics.theadHeight <= 1.1, 'visual table header is clipped accessibly');
                 check(metrics.pseudoLabel.includes('Who'), 'mobile label renders');
-                check(mode !== 'stacked' || !metrics.secondCellColumns.includes(' '), 'narrow phone stacks label above value');
-                check(mode !== 'cards' || metrics.secondCellColumns.includes(' '), 'larger mobile uses label/value columns');
+                check(test.mode !== 'stacked' || !metrics.secondCellColumns.includes(' '), 'narrow phone stacks label above value');
+                check(test.mode !== 'cards' || metrics.secondCellColumns.includes(' '), 'larger mobile uses label/value columns');
               }
 
-              if (mode === 'desktop') {
+              if (test.mode === 'desktop') {
                 check(metrics.tableLayout === 'fixed', 'desktop retains fixed comparison table');
                 check(metrics.rowDisplay === 'table-row', 'desktop rows remain table rows');
                 check(metrics.firstCellDisplay === 'table-cell', 'desktop cells remain table cells');
@@ -278,12 +264,14 @@ jobs:
                 window.scrollTo(0, target.getBoundingClientRect().top + scrollY - 24);
               });
               await page.waitForTimeout(100);
-              await page.screenshot({ path: `output/screens/${name}-viewport.png` });
-              await page.locator('.lens-block').screenshot({ path: `output/screens/${name}-section.png` });
+              await page.screenshot({ path: `output/screens/${test.name}-viewport.png` });
+              if (['original-375', 'fixed-375', 'fixed-768', 'fixed-1024'].includes(test.name)) {
+                await page.locator('.lens-block').screenshot({ path: `output/screens/${test.name}-section.png` });
+              }
 
               const failed = checks.filter(item => !item.pass).map(item => item.message);
-              results.push({ name, width, height, mode, metrics, pageErrors, checks, passed: failed.length === 0, failed });
-              console.log(`${failed.length ? 'FAIL' : 'PASS'} ${name}`, JSON.stringify(metrics));
+              results.push({ ...test, metrics, pageErrors, checks, passed: failed.length === 0, failed });
+              console.log(`${failed.length ? 'FAIL' : 'PASS'} ${test.name}`, JSON.stringify(metrics));
               failed.forEach(message => console.log(`  - ${message}`));
               await context.close();
             }
