@@ -1,9 +1,9 @@
 name: Inspect Clarent live site
 
 on:
-  push:
+  pull_request:
     branches:
-      - agent/inspect-clarent-live
+      - main
 
 permissions:
   contents: read
