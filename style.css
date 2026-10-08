@@ -182,6 +182,15 @@ img { max-width: 100%; height: auto; display: block; }
   color: var(--text-muted);
   max-width: 34em;
 }
+.hero-note {
+  margin-top: 18px;
+  max-width: 38em;
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  border-left: 2px solid var(--accent);
+  padding-left: 14px;
+}
+.hero-note strong { color: var(--text); font-weight: 600; }
 .cta-row {
   margin-top: 32px;
   display: flex;
@@ -484,6 +493,7 @@ img { max-width: 100%; height: auto; display: block; }
   color: var(--accent-strong);
 }
 .iface-list dd { color: var(--text-muted); font-size: 0.92rem; }
+.iface-list dd strong { color: var(--text); font-weight: 600; }
 
 /* ---------- connectors ---------- */
 
@@ -511,6 +521,18 @@ img { max-width: 100%; height: auto; display: block; }
   padding: 7px 14px;
   font-size: 0.88rem;
   font-weight: 600;
+}
+.chip-roadmap {
+  background: transparent;
+  border-style: dashed;
+  color: var(--text-muted);
+}
+.chip-roadmap .chip-tag { color: var(--accent); }
+.connectors h3.roadmap-head { margin-top: 36px; }
+.roadmap-sub {
+  font-weight: 400;
+  font-size: 0.9rem;
+  color: var(--text-muted);
 }
 .chip-tag {
   font-family: var(--mono);

@@ -12,6 +12,10 @@ nothing to break.
   `sunder-business/zoe-sunder/111_design_partner_launch_assets.md`. Keep claims
   aligned with `sunder-business/product-roadmap.md` ("claims require proof") —
   update this page when connector maturity or pilot claims change.
+- Positioning (2026-10-08): identity governance for agent-first companies,
+  led by "who owns each AI agent, what it can actually reach, and proof that a
+  human approved it". Only list a connector or feature under "Available
+  today" once it ships; everything else goes in the "On the roadmap" group.
 - The site deliberately targets design-partner recruitment, not broad launch,
   per the roadmap's explicit not-now list.
 - The console screenshots in `assets/` are the real `sunder/apps/web` console
