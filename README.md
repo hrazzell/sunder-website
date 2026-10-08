@@ -18,15 +18,25 @@ nothing to break.
   today" once it ships; everything else goes in the "On the roadmap" group.
 - The site deliberately targets design-partner recruitment, not broad launch,
   per the roadmap's explicit not-now list.
-- The console screenshots in `assets/` are the real `sunder/apps/web` console
-  (dark theme) rendered with representative fixture data via mocked API
-  responses; the footer discloses this. Regenerate after major console UI
-  changes by re-running a similar Playwright harness against `npm run dev`.
-- The evidence JSON in the "prove it" section is excerpted from a real bundle
-  produced by `sunder/scripts/pilot-happy-path.sh`.
-- The CLI session and the Slack approval card are illustrative and labeled as
-  such in their captions.
-- Pilot stat-strip numbers are the success-criteria targets from the
+- The console screenshots in `assets/` (`console-overview.webp`,
+  `console-findings.webp`, `console-inbox.webp`) are real captures of the
+  current `sunder/apps/web` Console (dark theme, 1280x788 at 2x, resized to
+  2200px wide), running against a local `sunder-api` on PostgreSQL seeded
+  through the API with the synthetic Northstar fixtures (HR import, the mock
+  GitHub and Entra providers, a leaver, and one access review). Home and My
+  work are shown as reviewer Priya Shah, Findings as administrator Elena
+  García. The footer discloses that they show fixture data. Regenerate after
+  major Console UI changes the same way.
+- The evidence JSON in the "prove it" section is an illustrative excerpt in
+  the current sealed campaign evidence format (`campaign.json`, see
+  `sunder/src/campaign_evidence_rendition.rs`) with synthetic values, and is
+  labelled as such.
+- The `sunderctl` session is a real run of `sunder/scripts/sunderctl` against
+  the same synthetic Northstar lab, with IDs shortened and output trimmed.
+- The Slack approval card is illustrative and labelled as roadmap.
+- `og-image.png` (1200x630) is rendered from a simple HTML card with
+  Playwright using the page headline and the `style.css` colours.
+- Pilot stat-strip numbers are target success criteria, agreed per pilot, from the
   design-partner launch assets — keep them in sync with that doc.
 
 ## Local preview

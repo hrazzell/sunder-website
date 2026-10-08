@@ -65,10 +65,10 @@
       <figure class="browser hero-shot">
         <figcaption class="browser-bar">
           <span class="tdot" aria-hidden="true"></span><span class="tdot" aria-hidden="true"></span><span class="tdot" aria-hidden="true"></span>
-          <span class="browser-title">Sunder console &middot; Overview</span>
+          <span class="browser-title">Sunder console &middot; Home</span>
         </figcaption>
         <img src="assets/console-overview.webp" width="2200" height="1354"
-             alt="Sunder console overview: connected systems, identities, accounts, open findings, governance drift, and per-system sync health">
+             alt="Sunder console Home for reviewer Priya Shah: six access review decisions about leaver Maya Chen assigned to her across Northstar GitHub and Microsoft Entra, and nine serious findings across three connected systems">
       </figure>
     </div>
   </section>
@@ -88,8 +88,8 @@
         the answer lives in a spreadsheet nobody trusts.
       </p>
 
-      <figure class="diagram" role="img" aria-label="Diagram: scattered access data from HR, GitHub, Microsoft Entra, repository config and an ownership spreadsheet becomes one correlated access graph in Sunder, with a leaver who is still in GitHub teams flagged">
-        <svg viewBox="0 0 960 340" xmlns="http://www.w3.org/2000/svg">
+      <figure class="diagram">
+        <svg viewBox="0 0 960 340" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagram: scattered access data from HR, GitHub, Microsoft Entra, repository config and an ownership spreadsheet becomes one correlated access graph in Sunder, with a leaver who is still in GitHub teams flagged">
           <!-- left: scattered systems -->
           <g class="dg-scatter">
             <rect x="28"  y="48"  width="128" height="40" rx="8" transform="rotate(-4 92 68)"/>
@@ -167,7 +167,7 @@
           <span class="browser-title">Sunder console &middot; Findings</span>
         </figcaption>
         <img src="assets/console-findings.webp" width="2200" height="1354" loading="lazy"
-             alt="Sunder findings table: terminated identity with active account (critical), privileged access without owner, orphan accounts, segregation of duties violation, each with severity, status, affected objects, policy, and evidence">
+             alt="Sunder Findings page: critical findings that terminated identity Maya Chen retains Entra access such as Privileged Role Administrator, and a high finding that the GitHub account orphan-prod-bot is not linked to any identity, each showing who, which access, the signing-in account and the reporting system">
       </figure>
     </div>
   </section>
@@ -179,8 +179,8 @@
         <p class="kicker">02 / decide it</p>
         <h2>Reviews people actually complete, and removals you can prove.</h2>
         <p class="section-lede">
-          Scoped access-review campaigns land as assigned tasks in the web
-          Governance Inbox. Every decision records who decided, why, and what
+          Scoped access-review campaigns land as assigned tasks in each
+          reviewer&rsquo;s web inbox, My work. Every decision records who decided, why, and what
           they saw. When a reviewer revokes access, Sunder removes it where it
           can (GitHub team membership today), routes the rest to a person, and
           then checks that the access is really gone.
@@ -190,10 +190,10 @@
         <figure class="browser">
           <figcaption class="browser-bar">
             <span class="tdot" aria-hidden="true"></span><span class="tdot" aria-hidden="true"></span><span class="tdot" aria-hidden="true"></span>
-            <span class="browser-title">Sunder console &middot; Governance Inbox</span>
+            <span class="browser-title">Sunder console &middot; My work</span>
           </figcaption>
           <img src="assets/console-inbox.webp" width="2200" height="1354" loading="lazy"
-               alt="Sunder Governance Inbox: assigned access review items and an access request approval with due dates, Slack/Teams delivery states, and approve/reject/review actions">
+               alt="Sunder My work inbox for reviewer Priya Shah: six access review decisions waiting on her for leaver Maya Chen, including the GitHub production-deployers team and Entra Privileged Role Administrator, each with a Review action">
         </figure>
         <figure class="chat-mock" aria-label="Illustrative preview of roadmap Slack delivery">
           <div class="chat-head">
@@ -212,7 +212,7 @@
             <span class="chat-btn">Revoke</span>
             <span class="chat-btn">Open in Sunder</span>
           </div>
-          <figcaption>Illustrative preview. Slack delivery and agent owner reviews are on the roadmap; today, review tasks land in the web Governance Inbox.</figcaption>
+          <figcaption>Illustrative preview. Slack delivery and agent owner reviews are on the roadmap; today, review tasks land in the web inbox, My work.</figcaption>
         </figure>
       </div>
     </div>
@@ -234,22 +234,25 @@
       <figure class="terminal evidence-panel">
         <figcaption class="terminal-bar">
           <span class="tdot" aria-hidden="true"></span><span class="tdot" aria-hidden="true"></span><span class="tdot" aria-hidden="true"></span>
-          <span class="terminal-title">sunder-governance-evidence.json</span>
+          <span class="terminal-title">campaign.json &middot; sealed campaign evidence</span>
         </figcaption>
         <pre><code>{
-  <span class="j-k">"review_campaign"</span>: {
-    <span class="j-k">"id"</span>: <span class="j-s">"campaign-governance-slice-q2"</span>,
-    <span class="j-k">"decision"</span>: <span class="j-s">"certify"</span>,
-    <span class="j-k">"decided_item_id"</span>: <span class="j-s">"campaign-governance-slice-q2:grant:grant-rest-alice-engineering"</span>,
-    <span class="j-k">"evidence_id"</span>: <span class="j-s">"&hellip;:decision:evidence"</span>
-  },
+  <span class="j-k">"encoding_version"</span>: <span class="j-n">1</span>,
+  <span class="j-k">"campaign_id"</span>: <span class="j-s">"6f1c2a90-&hellip;"</span>,
+  <span class="j-k">"baseline_id"</span>: <span class="j-s">"11305c12-&hellip;"</span>,
+  <span class="j-k">"findings"</span>: [
+    [<span class="j-s">"f1ba8ab5-&hellip;"</span>, <span class="j-s">"11305c12-&hellip;"</span>, <span class="j-s">"terminated_identity_retained_access"</span>,
+     <span class="j-s">"critical"</span>, <span class="j-s">"2026-10-01 09:02:11+00"</span>]
+  ],
+  <span class="j-k">"decisions"</span>: [
+    [<span class="j-s">"d41e07c3-&hellip;"</span>, <span class="j-s">"11305c12-&hellip;"</span>, <span class="j-s">"revoke"</span>,
+     <span class="j-s">"Left 30 Sep; production access no longer needed"</span>,
+     <span class="j-s">"7c9e1b44-&hellip;"</span>, <span class="j-s">"fresh"</span>, <span class="j-s">"2026-10-02 09:14:03+00"</span>]
+  ],
   &hellip;
-  <span class="j-k">"reconciliation_run"</span>: {
-    <span class="j-k">"id"</span>: <span class="j-s">"run-governance-slice-001"</span>, <span class="j-k">"status"</span>: <span class="j-s">"succeeded"</span>,
-    <span class="j-k">"diff_summary"</span>: { <span class="j-k">"created"</span>: <span class="j-n">16</span>, <span class="j-k">"unresolved"</span>: <span class="j-n">1</span> }
-  }
+  <span class="j-k">"readable_context"</span>: { <span class="j-k">"version"</span>: <span class="j-n">1</span>, <span class="j-k">"selected"</span>: <span class="j-n">6</span>, <span class="j-k">"decided"</span>: <span class="j-n">6</span>, <span class="j-k">"pending"</span>: <span class="j-n">0</span>, &hellip; }
 }</code></pre>
-        <p class="terminal-note">Excerpt from a real evidence bundle produced by Sunder&rsquo;s deterministic pilot run: the review decision and the reconciliation that backs it, in one export.</p>
+        <p class="terminal-note">Illustrative excerpt in the current evidence format, with synthetic values. The sealed package pairs this machine-readable record with CSVs, an executive report, a manifest of checksums and an offline HTML summary.</p>
       </figure>
     </div>
   </section>
@@ -269,31 +272,35 @@
         </p>
         <dl class="iface-list">
           <div><dt>REST API</dt><dd><strong>Available.</strong> Governance operations as API calls, with an audit trail. Your agents use the same API as the console.</dd></div>
-          <div><dt>Operator CLI</dt><dd><strong>Available.</strong> Scriptable <code>sunder</code> commands over the same API.</dd></div>
-          <div><dt>Web inbox</dt><dd><strong>Available.</strong> The Governance Inbox for reviews and decisions. Slack delivery is coming.</dd></div>
+          <div><dt>CLI</dt><dd><strong>Available.</strong> <code>sunderctl</code> calls any API operation by its operation ID and checks your credential first.</dd></div>
+          <div><dt>Web inbox</dt><dd><strong>Available.</strong> My work, the web inbox for reviews and decisions. Slack delivery is coming.</dd></div>
           <div><dt>MCP server</dt><dd><strong>Coming.</strong> Agents ask governed questions and prepare requests for a person to decide.</dd></div>
         </dl>
       </div>
-      <figure class="terminal" aria-label="Illustrative Sunder CLI session">
+      <figure class="terminal" aria-label="sunderctl session against the synthetic Northstar lab">
         <figcaption class="terminal-bar">
           <span class="tdot" aria-hidden="true"></span><span class="tdot" aria-hidden="true"></span><span class="tdot" aria-hidden="true"></span>
-          <span class="terminal-title">sunder &middot; operator CLI</span>
+          <span class="terminal-title">sunderctl &middot; REST API client</span>
         </figcaption>
-        <pre><code><span class="t-prompt">$</span> sunder sync --connector github --system github-prod
-<span class="t-ok">&#10003;</span> sync complete &middot; 412 accounts &middot; 1,847 entitlements
+        <pre><code><span class="t-prompt">$</span> sunderctl can createCanonicalSystemCollectionRun
+<span class="t-ok">allowed:</span> createCanonicalSystemCollectionRun
 
-<span class="t-prompt">$</span> sunder findings --severity high
-<span class="t-sev-orphan">LEAVER</span>   github:mchen &middot; left 30 Sep, still in 2 teams
-<span class="t-sev-priv">ORPHAN</span>   github:build-bot-old &middot; no matching identity
-<span class="t-sev-unres">ORPHAN</span>   entra:sp-reporting &middot; no matching identity
+<span class="t-prompt">$</span> sunderctl call createCanonicalSystemCollectionRun \
+    --path system_id=bcabf7b5-&hellip; \
+    --idempotency-key github-nightly-20261008 \
+    --data '{"collections":[]}' | jq -c '{run_id, state}'
+{"run_id":"524ce70c-&hellip;","state":"queued"}
 
-<span class="t-prompt">$</span> sunder review-generate --name "Q3 GitHub admin review" \
-    --system github-prod
-<span class="t-ok">&#10003;</span> campaign created &middot; 23 items &middot; 4 reviewers assigned
+<span class="t-prompt">$</span> sunderctl call listCanonicalFindings --query severity=critical \
+    | jq -r '.items[] | [.severity, .subject.display_name] | @tsv'
+<span class="t-sev-orphan">critical</span>  Maya Chen
+<span class="t-sev-orphan">critical</span>  Maya Chen
+&hellip;
 
-<span class="t-prompt">$</span> sunder export-evidence --campaign q3-github-admin
-<span class="t-ok">&#10003;</span> evidence bundle &rarr; decisions, rationale, audit trail</code></pre>
-        <p class="terminal-note">Illustrative session. The CLI uses the same REST API as the web console and your agents.</p>
+<span class="t-prompt">$</span> sunderctl can decideCanonicalReviewItem
+<span class="t-sev-priv">denied:</span> decideCanonicalReviewItem
+  - canonical Human actor identity required</code></pre>
+        <p class="terminal-note">Real session against Sunder&rsquo;s synthetic Northstar lab, with IDs shortened and output trimmed. Tokens can gather and prepare; review decisions require a person.</p>
       </figure>
     </div>
 
@@ -356,7 +363,7 @@
         </li>
         <li>
           <span class="tl-when">Weeks 2&ndash;4</span>
-          <p>Leaver and orphaned-account findings triaged, a scoped review campaign, decisions collected in the Governance Inbox.</p>
+          <p>Leaver and orphaned-account findings triaged, a scoped review campaign, decisions collected in the web inbox.</p>
         </li>
         <li>
           <span class="tl-when">Weeks 5&ndash;8</span>
@@ -396,13 +403,13 @@
         </div>
       </div>
 
-      <div class="stat-strip" aria-label="Pilot success criteria">
+      <div class="stat-strip" aria-label="Target pilot success criteria">
         <div class="stat"><span class="stat-num">&lt;7 days</span><span class="stat-label">to first normalized graph</span></div>
         <div class="stat"><span class="stat-num">&ge;80%</span><span class="stat-label">account correlation coverage</span></div>
         <div class="stat"><span class="stat-num">&ge;90%</span><span class="stat-label">review decisions completed</span></div>
         <div class="stat"><span class="stat-num">&ge;30%</span><span class="stat-label">less spreadsheet/screenshot work</span></div>
       </div>
-      <p class="stat-note">The success criteria we sign up for in every pilot, measured against your data.</p>
+      <p class="stat-note">Target success criteria, agreed per pilot, measured against your data.</p>
 
       <aside class="founder-note">
         <p>
@@ -472,7 +479,7 @@
 <footer class="footer">
   <div class="container footer-inner">
     <span class="wordmark wordmark-sm">sunder<span class="cursor" aria-hidden="true"></span></span>
-    <p>&copy; 2026 Sunder. Proprietary software; source access for customers by written agreement. Console screenshots show fixture data.</p>
+    <p>&copy; 2026 Sunder. Proprietary software; source access for customers by written agreement. Console screenshots show synthetic fixture data.</p>
     <a href="mailto:hrazzell@gmail.com">Contact</a>
   </div>
 </footer>
